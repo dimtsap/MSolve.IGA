@@ -441,6 +441,92 @@ namespace MGroup.IGA.Tests
 				Utilities.AreValuesEqual(expectedSolution[i], solver.LinearSystems[0].Solution[i], 7);
 		}
 
+
+		[Fact]
+		public void ScordelisLoShell()
+		{
+			Model model = new Model();
+			var filename = "SquareShell";
+			string filepath = $"..\\..\\..\\MGroup.IGA.Tests\\InputFiles\\{filename}.txt";
+			IsogeometricShellReader modelReader = new IsogeometricShellReader(model, filepath);
+			modelReader.CreateShellModelFromFile();
+
+			model.Loads.Add(new Load()
+			{
+				Amount = -1,
+				Node = model.ControlPointsDictionary[9],
+				DOF = StructuralDof.TranslationZ
+			});
+			model.Loads.Add(new Load()
+			{
+				Amount = -1,
+				Node = model.ControlPointsDictionary[10],
+				DOF = StructuralDof.TranslationZ
+			});
+			model.Loads.Add(new Load()
+			{
+				Amount = -1,
+				Node = model.ControlPointsDictionary[11],
+				DOF = StructuralDof.TranslationZ
+			});
+
+
+			// Symmetry for AD
+			for (var j = 0; j < 19; j++)
+			{
+				model.ControlPointsDictionary[j].Constrains.Add(new Constraint() { DOF = StructuralDof.TranslationX });
+				model.ControlPointsDictionary[j + 19].Constrains.Add(new Constraint() { DOF = StructuralDof.TranslationX });
+				model.AddPenaltyConstrainedDofPair(new PenaltyDofPair(
+					new NodalDof(model.ControlPointsDictionary[j], StructuralDof.TranslationY),
+					new NodalDof(model.ControlPointsDictionary[j + 19], StructuralDof.TranslationY),
+					0.0));
+				model.AddPenaltyConstrainedDofPair(new PenaltyDofPair(
+					new NodalDof(model.ControlPointsDictionary[j], StructuralDof.TranslationZ),
+					new NodalDof(model.ControlPointsDictionary[j + 19], StructuralDof.TranslationZ),
+					0.0));
+			}
+
+
+			// Rigid diaphragm for AB
+			for (var i = 0; i < 19; i++)
+			{
+				model.ControlPointsDictionary[i * 19].Constrains.Add(new Constraint() { DOF = StructuralDof.TranslationX });
+				model.ControlPointsDictionary[i * 19].Constrains.Add(new Constraint() { DOF = StructuralDof.TranslationY });
+			}
+
+			// Symmetry for CD
+			for (var i = 0; i < 19; i++)
+			{
+				model.ControlPointsDictionary[i * 19 + 18].Constrains.Add(new Constraint() { DOF = StructuralDof.TranslationZ });
+
+				model.ControlPointsDictionary[i * 19 + 17].Constrains.Add(new Constraint() { DOF = StructuralDof.TranslationZ });
+				model.AddPenaltyConstrainedDofPair(new PenaltyDofPair(
+					new NodalDof(model.ControlPointsDictionary[i * 19 + 18], StructuralDof.TranslationX),
+					new NodalDof(model.ControlPointsDictionary[i * 19 + 17], StructuralDof.TranslationX),
+					0.0));
+				model.AddPenaltyConstrainedDofPair(new PenaltyDofPair(
+					new NodalDof(model.ControlPointsDictionary[i * 19 + 18], StructuralDof.TranslationY),
+					new NodalDof(model.ControlPointsDictionary[i * 19 + 17], StructuralDof.TranslationY),
+					0.0));
+			}
+
+
+			// Solvers
+			var solverBuilder = new SkylineSolver.Builder();
+			ISolver solver = solverBuilder.BuildSolver(model);
+
+			// Structural problem provider
+			var provider = new ProblemStructural(model, solver);
+
+			// Linear static analysis
+			var childAnalyzer = new LinearAnalyzer(model, solver, provider);
+			var parentAnalyzer = new StaticAnalyzer(model, solver, provider, childAnalyzer);
+
+			// Run the analysis
+			parentAnalyzer.Initialize();
+			parentAnalyzer.Solve();
+		}
+
 		[Fact]
 		public void IsogeometricSquareShell()
 		{

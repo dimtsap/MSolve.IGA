@@ -1,3 +1,5 @@
+using MGroup.IGA.Elements;
+
 namespace MGroup.IGA.Entities
 {
 	using System;
@@ -18,6 +20,10 @@ namespace MGroup.IGA.Entities
 	public class Model : IModel
 	{
 		private IGlobalFreeDofOrdering _globalDofOrdering;
+
+
+		IList<PenaltyDofPair> PenaltyDofPairs { get; }
+
 
 		/// <summary>
 		/// <see cref="Table{TRow,TColumn,TValue}"/> that contains the constrained degree of freedom and the value of their constrains.
@@ -64,6 +70,14 @@ namespace MGroup.IGA.Entities
 					patch.FreeDofOrdering = GlobalDofOrdering.SubdomainDofOrderings[patch];
 				}
 			}
+		}
+
+		private readonly List<PenaltyDofPair> penaltyBC = new List<PenaltyDofPair>();
+
+		public void AddPenaltyConstrainedDofPair(PenaltyDofPair penaltyDofPair)
+		{
+			penaltyBC.Add(penaltyDofPair);
+			this.Elements.Add(penaltyDofPair);
 		}
 
 		/// <summary>
@@ -122,6 +136,7 @@ namespace MGroup.IGA.Entities
 			foreach (var patch in PatchesDictionary.Values) patch.Forces.Clear();
 			AssignNodalLoads(distributeNodalLoads);
 			AssignBoundaryLoads();
+			//Add possible penalty forces
 		}
 
 		/// <summary>
