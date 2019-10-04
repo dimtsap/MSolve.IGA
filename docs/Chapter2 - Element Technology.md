@@ -1,9 +1,9 @@
 # Element Technology
 
-A summary of basic elements provided in **MSolve.IGA** is provided.
+A summary of basic elements existing in **MSolve.IGA** is provided.
 
 ## Continuum Elements
-This element category contains structural mechanics isogeometric elements with only transitional degrees of freedom. In the case of Isogeometric Analysis which does approximate the geometry, elements are entities that can be created by deviding the patch utilizing existing CAD properties. For more information on Isogeometric Analysis please refer to [1].
+This element category contains structural mechanics isogeometric elements with only transitional degrees of freedom. In the case of Isogeometric Analysis which does approximate the geometry, elements are entities that can be created by dividing the patch utilizing existing CAD properties. For more information on Isogeometric Analysis please refer to [1].
 ### Nurbs Element 1D
 In case of NURBS shape functions, one-dimensional elements are created utilizing the Knot Value Vector. For instance let given a knot value vector Ξ=\{ 0,0,0,1,2,3,4,5,6,6,6 \}.
 Its unique values provide the Knots which in this example are:
