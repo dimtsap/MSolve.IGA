@@ -17,7 +17,7 @@ namespace MGroup.IGA.Elements
 	{
 		private const double PenaltyCoefficient = 10e8;
 
-		public PenaltyDofPair(NodalDof firstPenaltyDof, NodalDof secondPenaltyDof, double dofDifference)
+		public PenaltyDofPair(NodalDof firstPenaltyDof, NodalDof secondPenaltyDof, double dofDifference = 0.0)
 		{
 			FirstPenaltyDof = firstPenaltyDof;
 			SecondPenaltyDof = secondPenaltyDof;

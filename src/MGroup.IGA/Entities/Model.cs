@@ -1,4 +1,6 @@
 using MGroup.IGA.Elements;
+using MGroup.IGA.Entities.Loads;
+using MGroup.IGA.Interfaces;
 
 namespace MGroup.IGA.Entities
 {
@@ -22,8 +24,9 @@ namespace MGroup.IGA.Entities
 		private IGlobalFreeDofOrdering _globalDofOrdering;
 
 
-		IList<PenaltyDofPair> PenaltyDofPairs { get; }
+		private IList<PenaltyDofPair> PenaltyDofPairs { get; } = new List<PenaltyDofPair>();
 
+		public IList<ISurfaceLoad> SurfaceLoads { get; } = new List<ISurfaceLoad>();
 
 		/// <summary>
 		/// <see cref="Table{TRow,TColumn,TValue}"/> that contains the constrained degree of freedom and the value of their constrains.
@@ -77,7 +80,17 @@ namespace MGroup.IGA.Entities
 		public void AddPenaltyConstrainedDofPair(PenaltyDofPair penaltyDofPair)
 		{
 			penaltyBC.Add(penaltyDofPair);
-			this.Elements.Add(penaltyDofPair);
+			var id = ElementsDictionary.Keys.Last() + 1;
+			penaltyDofPair.ID = id;
+			Element element = new PenaltyDofPair(penaltyDofPair.FirstPenaltyDof, penaltyDofPair.SecondPenaltyDof)
+			{
+				ID = id,
+				Patch = PatchesDictionary[0],
+				ElementType = penaltyDofPair,
+			};
+
+			PatchesDictionary[0].Elements.Add(element);
+			ElementsDictionary.Add(id, element);
 		}
 
 		/// <summary>
@@ -209,12 +222,16 @@ namespace MGroup.IGA.Entities
 
 		private static void AssignEdgeLoads(Patch patch)
 		{
-			foreach (Edge edge in patch.EdgesDictionary.Values)
+			foreach (var edge in patch.EdgesDictionary.Values)
 			{
-				Dictionary<int, double> edgeLoadDictionary = edge.CalculateLoads();
-				foreach (int dof in edgeLoadDictionary.Keys)
+				var edgeLoadDictionary = edge.CalculateLoads();
+				foreach (var dof in edgeLoadDictionary.Keys)
+				{
 					if (dof != -1)
+					{
 						patch.Forces[dof] += edgeLoadDictionary[dof];
+					}
+				}
 			}
 		}
 
@@ -236,6 +253,39 @@ namespace MGroup.IGA.Entities
 				AssignEdgeLoads(patch);
 
 				AssignFaceLoads(patch);
+
+				AssignSurfaceLoads(patch);
+			}
+
+		}
+
+		private void AssignSurfaceLoads(Patch patch)
+		{
+			foreach (var surfaceLoad in SurfaceLoads)
+			{
+				foreach (var element in ElementsDictionary.Values.Where(e => e is ISurfaceLoadedElement))
+				{
+					var dofs = element.ElementType.GetElementDofTypes(element);
+					var loadedDofs = new Dictionary<int, double>();
+					switch (surfaceLoad)
+					{
+						case SurfacePressureLoad pressure:
+							loadedDofs =
+								(element as ISurfaceLoadedElement).CalculateSurfacePressure(element, pressure.Pressure);
+							break;
+						case SurfaceDistributedLoad distributedLoad:
+							loadedDofs =
+								(element as ISurfaceLoadedElement).CalculateSurfaceDistributedLoad(element, distributedLoad.Dof,
+									distributedLoad.Magnitude);
+							break;
+					}
+
+					foreach (var dof in loadedDofs.Keys)
+					{
+						if (dof != -1)
+							patch.Forces[dof] += loadedDofs[dof];
+					}
+				}
 			}
 		}
 

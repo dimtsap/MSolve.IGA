@@ -1,3 +1,5 @@
+using MGroup.MSolve.Discretization.Commons;
+
 namespace MGroup.IGA.Elements
 {
 	using System;
@@ -23,7 +25,7 @@ namespace MGroup.IGA.Elements
 	/// For more information please refer to <see href="https://www.sciencedirect.com/science/article/pii/S0045782509002680"/>
 	/// Authors: Dimitris Tsapetis.
 	/// </summary>
-	public class NurbsKirchhoffLoveShellElement : Element, IStructuralIsogeometricElement
+	public class NurbsKirchhoffLoveShellElement : Element, IStructuralIsogeometricElement, ISurfaceLoadedElement
 	{
 		protected static readonly IDofType[] ControlPointDofTypes = { StructuralDof.TranslationX, StructuralDof.TranslationY, StructuralDof.TranslationZ };
 		private IDofType[][] dofTypes;
@@ -460,6 +462,84 @@ namespace MGroup.IGA.Elements
 		{
 			GaussQuadrature gauss = new GaussQuadrature();
 			return gauss.CalculateElementGaussPoints(element.Patch.DegreeKsi, element.Patch.DegreeHeta, element.Knots.ToArray());
+		}
+
+		public Dictionary<int, double> CalculateSurfacePressure(Element element, double pressureMagnitude)
+		{
+			var shellElement = (NurbsKirchhoffLoveShellElement)element;
+			var elementControlPoints = shellElement.ControlPoints.ToArray();
+			var gaussPoints = CreateElementGaussPoints(shellElement);
+			var pressureLoad = new Dictionary<int, double>();
+			var nurbs = new Nurbs2D(shellElement, elementControlPoints);
+
+			for (var j = 0; j < gaussPoints.Count; j++)
+			{
+				var jacobianMatrix = CalculateJacobian(shellElement, nurbs, j);
+				var surfaceBasisVector1 = CalculateSurfaceBasisVector1(jacobianMatrix, 0);
+				var surfaceBasisVector2 = CalculateSurfaceBasisVector1(jacobianMatrix, 1);
+				var surfaceBasisVector3 = surfaceBasisVector1.CrossProduct(surfaceBasisVector2);
+				var J1 = surfaceBasisVector3.Norm2();
+				surfaceBasisVector3.ScaleIntoThis(1 / J1);
+
+				for (int i = 0; i < elementControlPoints.Length; i++)
+				{
+					for (int k = 0; k < ControlPointDofTypes.Length; k++)
+					{
+						int dofId = element.Model.GlobalDofOrdering.GlobalFreeDofs[elementControlPoints[i], ControlPointDofTypes[k]];
+
+						if (pressureLoad.ContainsKey(dofId))
+						{
+							pressureLoad[dofId] += pressureMagnitude * surfaceBasisVector3[k] *
+												   nurbs.NurbsValues[i, j] * gaussPoints[j].WeightFactor;
+						}
+						else
+						{
+							pressureLoad.Add(dofId, pressureMagnitude * surfaceBasisVector3[k] * nurbs.NurbsValues[i, j] * gaussPoints[j].WeightFactor);
+						}
+					}
+				}
+			}
+
+			return pressureLoad;
+		}
+
+		public Dictionary<int, double> CalculateSurfaceDistributedLoad(Element element, IDofType loadedDof, double loadMagnitude)
+		{
+			var shellElement = (NurbsKirchhoffLoveShellElement)element;
+			var elementControlPoints = shellElement.ControlPoints.ToArray();
+			var gaussPoints = CreateElementGaussPoints(shellElement);
+			var distributedLoad = new Dictionary<int, double>();
+			var nurbs = new Nurbs2D(shellElement, elementControlPoints);
+
+			for (var j = 0; j < gaussPoints.Count; j++)
+			{
+				var jacobianMatrix = CalculateJacobian(shellElement, nurbs, j);
+				var surfaceBasisVector1 = CalculateSurfaceBasisVector1(jacobianMatrix, 0);
+				var surfaceBasisVector2 = CalculateSurfaceBasisVector1(jacobianMatrix, 1);
+				var surfaceBasisVector3 = surfaceBasisVector1.CrossProduct(surfaceBasisVector2);
+				var J1 = surfaceBasisVector3.Norm2();
+				surfaceBasisVector3.ScaleIntoThis(1 / J1);
+
+				for (int i = 0; i < elementControlPoints.Length; i++)
+				{
+					var loadedDofIndex = ControlPointDofTypes.FindFirstIndex(loadedDof);
+					if (!element.Model.GlobalDofOrdering.GlobalFreeDofs.Contains(elementControlPoints[i], loadedDof))
+						continue;
+					var dofId = element.Model.GlobalDofOrdering.GlobalFreeDofs[elementControlPoints[i], loadedDof];
+
+					if (distributedLoad.ContainsKey(dofId))
+					{
+						distributedLoad[dofId] += loadMagnitude * J1 *
+												  nurbs.NurbsValues[i, j] * gaussPoints[j].WeightFactor;
+					}
+					else
+					{
+						distributedLoad.Add(dofId, loadMagnitude * nurbs.NurbsValues[i, j] * J1 * gaussPoints[j].WeightFactor);
+					}
+				}
+			}
+
+			return distributedLoad;
 		}
 	}
 }
