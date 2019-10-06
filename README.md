@@ -68,4 +68,4 @@ You can choose either to clone the solution or downloads it as a zip file.
 
 3. Extract the ZIP file to the folder of choice.
 
-4. Double click on **MSolve.IGA.sln** file to open the code with Visual Studio
+4. Double click on **MGroup.IGA.sln** file to open the code with Visual Studio
