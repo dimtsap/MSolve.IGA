@@ -476,3 +476,4 @@ connectionStrings.json
 **/wwwroot/assets/*
 *.vtu
 *.vts
+/NuGet.Config
