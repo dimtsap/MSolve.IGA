@@ -28,14 +28,15 @@ steps:
     feedRestore: 'MSolve-Nugets'
 
 
-- task: SonarCloudPrepare@1
-  displayName: "Prepares SonarCloud analysis"
-  inputs:
-    SonarCloud: 'SonarCloud'
-    organization: 'mgroupntua'
-    scannerMode: 'MSBuild'
-    projectKey: 'MSolve.IGA'
-    extraProperties: 'sonar.cs.opencover.reportsPaths=$(Build.SourcesDirectory)/coverage/coverage.opencover.xml'
+# - task: SonarCloudPrepare@1
+#   displayName: "Prepares SonarCloud analysis"
+#   inputs:
+#     SonarCloud: 'SonarCloud'
+#     organization: 'mgroupntua'
+#     scannerMode: 'MSBuild'
+#     projectKey: 'MSolve.IGA'
+#     extraProperties: 'sonar.cs.opencover.reportsPaths=$(Build.SourcesDirectory)/coverage/coverage.opencover.xml'
+
 
 
 - task: DotNetCoreCLI@2
@@ -47,18 +48,26 @@ steps:
     verbosityPack: 'Minimal'
     configuration: '$(buildConfiguration)'
 
-- script: |
-    dotnet test --logger trx --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=$(Build.SourcesDirectory)/coverage/ $(testProject)
-  displayName: 'Runs tests'
-
-
-- task: SonarCloudAnalyze@1
-  displayName: "Performs SonarCloud Analysis"
-
-- task: SonarCloudPublish@1
-  displayName: 'Publish Quality Gate Results'
+- task: DotNetCoreCLI@2
   inputs:
-    pollingTimeoutSec: '300'
+    command: 'test'
+    arguments: '--configuration $(BuildConfiguration)  /p:CollectCoverage=true  /p:CoverletOutputFormat=cobertura   /p:CoverletOutput=$(Build.SourcesDirectory)\TestResults\Coverage\'
+    testRunTitle: 'Runs tests'
+
+
+
+# - script: |
+#     dotnet test --logger trx --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=$(Build.SourcesDirectory)/coverage/ $(testProject)
+#   displayName: 'Runs tests'
+
+
+# - task: SonarCloudAnalyze@1
+#   displayName: "Performs SonarCloud Analysis"
+
+# - task: SonarCloudPublish@1
+#   displayName: 'Publish Quality Gate Results'
+#   inputs:
+#     pollingTimeoutSec: '300'
 
 - task: PublishTestResults@2
   inputs:
