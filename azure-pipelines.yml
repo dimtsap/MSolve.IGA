@@ -29,7 +29,7 @@ steps:
     feedRestore: 'MSolve-Nugets'
 
 - task: SonarCloudPrepare@1
-  displayName: "Prepares SonarCloud analysis"
+  displayName: "Prepares SonarCloud analysis (master)"
   condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
   inputs:
     SonarCloud: 'SonarCloud'
@@ -50,23 +50,23 @@ steps:
 
 - script: |
     dotnet test --logger trx --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=$(Build.SourcesDirectory)/coverage/ $(testProject)
-  displayName: 'Runs tests'
+  displayName: 'Runs tests (master)'
   condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
 
 
 - task: SonarCloudAnalyze@1
-  displayName: "Performs SonarCloud Analysis"
+  displayName: "Performs SonarCloud Analysis (master)"
   condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
 
 - task: SonarCloudPublish@1
-  displayName: 'Publish Quality Gate Results'
+  displayName: 'Publish Quality Gate Results (master)'
   condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
   inputs:
     pollingTimeoutSec: '300'
 
 
 - task: DotNetCoreCLI@2
-  displayName: Runs Tests
+  displayName: Runs Tests (develop)
   condition: eq(variables['Build.SourceBranch'], 'refs/heads/develop')
   inputs:
     command: 'test'
@@ -75,13 +75,14 @@ steps:
     publishTestResults: true
 
 - task: reportgenerator@4
-  displayName: Generate coverage report
+  displayName: Generate coverage report (develop)
   condition: eq(variables['Build.SourceBranch'], 'refs/heads/develop')
   inputs:
     reports: '**/coverage.cobertura.xml'
     targetdir: 'CoverageReport'
 
 - task: PublishCodeCoverageResults@1
+  displayName: Publish Code Coverage Results (develop)
   condition: eq(variables['Build.SourceBranch'], 'refs/heads/develop')
   inputs:
     codeCoverageTool: 'Cobertura'
@@ -89,7 +90,7 @@ steps:
     reportDirectory: 'CoverageReport'
 
 - task: ResharperCli@2
-  displayName: Code analysis
+  displayName: Code analysis (develop)
   condition: eq(variables['Build.SourceBranch'], 'refs/heads/develop')
   inputs:
     solutionOrProjectPath: 'MGroup.IGA.sln'
