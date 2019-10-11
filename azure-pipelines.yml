@@ -49,16 +49,16 @@ steps:
     configuration: '$(buildConfiguration)'
 
 - task: DotNetCoreCLI@2
+  displayName: Runs Tests
   inputs:
     command: 'test'
-    arguments: '--configuration $(BuildConfiguration)  /p:CollectCoverage=true  /p:CoverletOutputFormat=cobertura   /p:CoverletOutput=$(Build.SourcesDirectory)\TestResults\Coverage\'
-    testRunTitle: 'Runs tests'
+    arguments: '--configuration $(BuildConfiguration)  /p:CollectCoverage=true  /p:CoverletOutputFormat=cobertura   /p:CoverletOutput=$(Build.SourcesDirectory)/TestResults/Coverage/'
 
 - task: reportgenerator@4
   displayName: Generates report
   inputs:
-    reports: '$(Build.SourcesDictionary)\TestResults\Coverage\coverage.cobertura.xml'
-    targetdir: '$(Build.SourcesDictionary)\coveragereport'
+    reports: '$(Build.SourcesDictionary)/TestResults/Coverage/coverage.cobertura.xml'
+    targetdir: '$(Build.SourcesDictionary)/coveragereport'
 
 - task: PublishCodeCoverageResults@1
   displayName: Publish Code Coverage Results
