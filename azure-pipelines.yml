@@ -54,6 +54,17 @@ steps:
     arguments: '--configuration $(BuildConfiguration)  /p:CollectCoverage=true  /p:CoverletOutputFormat=cobertura   /p:CoverletOutput=$(Build.SourcesDirectory)\TestResults\Coverage\'
     testRunTitle: 'Runs tests'
 
+- task: reportgenerator@4
+  displayName: Generates report
+  inputs:
+    reports: '$(Build.SourcesDictionary)\TestResults\Coverage\coverage.cobertura.xml'
+    targetdir: '$(Build.SourcesDictionary)\coveragereport'
+
+- task: PublishCodeCoverageResults@1
+  displayName: Publish Code Coverage Results
+  inputs:
+    codeCoverageTool: 'Cobertura'
+    summaryFileLocation: '$(Build.SourcesDictionary)\TestResults\Coverage\coverage.cobertura.xml'
 
 
 # - script: |
