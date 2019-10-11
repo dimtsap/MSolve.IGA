@@ -55,6 +55,13 @@ steps:
     summaryFileLocation: '**/coverage.cobertura.xml'
     reportDirectory: 'CoverageReport'
 
+- task: ResharperCli@2
+  displayName: Code analysis
+  inputs:
+    solutionOrProjectPath: 'MGroup.IGA.sln'
+    failBuildLevelSelector: 'Warning'
+    failBuildOnCodeIssues: false
+
 - task: DotNetCoreCLI@2
   name: dotnetPack
   displayName: "Packages new nugets"
