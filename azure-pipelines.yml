@@ -64,7 +64,7 @@ steps:
   displayName: Publish Code Coverage Results
   inputs:
     codeCoverageTool: 'Cobertura'
-    summaryFileLocation: '$(Build.SourcesDictionary)\TestResults\Coverage\coverage.cobertura.xml'
+    summaryFileLocation: '$(Build.SourcesDictionary)/TestResults/Coverage/coverage.cobertura.xml'
 
 
 # - script: |
