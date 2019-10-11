@@ -52,29 +52,11 @@ steps:
   displayName: Runs Tests
   inputs:
     command: 'test'
-    arguments: '--configuration $(BuildConfiguration)  /p:CollectCoverage=true  /p:CoverletOutputFormat=cobertura   /p:CoverletOutput=$(Build.SourcesDirectory)/TestResults/Coverage/'
-    publishTestResults: true
-
-- task: reportgenerator@4
-  displayName: Generates report
-  inputs:
-    reports: '$(Build.SourcesDictionary)/TestResults/Coverage/coverage.cobertura.xml'
-    targetdir: '$(Build.SourcesDictionary)/coveragereport'
+    projects: '**/*Tests/*.csproj'
+    arguments: '--configuration $(buildConfiguration) --collect "Code coverage"'
 
 
-
-# - script: |
-#     dotnet test --logger trx --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=$(Build.SourcesDirectory)/coverage/ $(testProject)
-#   displayName: 'Runs tests'
-
-
-# - task: SonarCloudAnalyze@1
-#   displayName: "Performs SonarCloud Analysis"
-
-# - task: SonarCloudPublish@1
-#   displayName: 'Publish Quality Gate Results'
-#   inputs:
-#     pollingTimeoutSec: '300'
+- script: dotnet test <test-project> --logger trx --collect "Code coverage"
 
 - task: PublishTestResults@2
   inputs:
