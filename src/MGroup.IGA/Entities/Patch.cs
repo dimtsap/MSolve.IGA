@@ -1,3 +1,5 @@
+using MGroup.Materials.ShellMaterials;
+
 namespace MGroup.IGA.Entities
 {
 	using System;
@@ -153,8 +155,7 @@ namespace MGroup.IGA.Entities
 		/// </summary>
 		public double[] CalculateElementDisplacements(IElement element, IVectorView globalDisplacementVector)
 		{
-			var elementNodalDisplacements = new double[FreeDofOrdering.CountElementDofs(element)];
-			FreeDofOrdering.ExtractVectorElementFromSubdomain(element, globalDisplacementVector);
+			var elementNodalDisplacements = FreeDofOrdering.ExtractVectorElementFromSubdomain(element, globalDisplacementVector);
 			SubdomainConstrainedDofOrderingBase.ApplyConstraintDisplacements(element, elementNodalDisplacements, Constraints);
 			return elementNodalDisplacements;
 		}
@@ -244,7 +245,7 @@ namespace MGroup.IGA.Entities
 		/// </summary>
 		public void SaveMaterialState()
 		{
-			throw new NotImplementedException();
+			foreach (Element element in Elements) element.ElementType.SaveMaterialState();
 		}
 
 		/// <summary>
@@ -1088,14 +1089,26 @@ namespace MGroup.IGA.Entities
 					}
 
 					int elementID = i * numberOfElementsHeta + j;
-					Element element = new NurbsKirchhoffLoveShellElement()
+					Element element = new NurbsKirchhoffLoveShellElementNL(new ShellElasticMaterial2D()
+					{
+						YoungModulus = 2.1e10,
+						PoissonRatio = 0.0
+					}, knotsOfElement, elementControlPoints.ToList(), this, 0.076)
 					{
 						ID = elementID,
 						Patch = this,
-						ElementType = new NurbsKirchhoffLoveShellElement()
+						Thickness = 0.076,
+						ElementType = new NurbsKirchhoffLoveShellElementNL(new ShellElasticMaterial2D()
+						{
+							YoungModulus = 2.1e10,
+							PoissonRatio = 0.0,
+						}, knotsOfElement, elementControlPoints.ToList(), this, 0.076)
+						{
+							ID = elementID,
+							Patch = this,
+							Thickness = 0.076
+						}
 					};
-					element.AddKnots(knotsOfElement);
-					element.AddControlPoints(elementControlPoints.ToList<ControlPoint>());
 					Elements.Add(element);
 				}
 			}

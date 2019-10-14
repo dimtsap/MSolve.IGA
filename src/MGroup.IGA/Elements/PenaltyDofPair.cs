@@ -52,7 +52,7 @@ namespace MGroup.IGA.Elements
 
 		public double[] CalculateForces(IElement element, double[] localDisplacements, double[] localdDisplacements)
 		{
-			throw new NotImplementedException();
+			return new double[2];
 		}
 
 		public double[] CalculateForcesForLogging(IElement element, double[] localDisplacements)
@@ -82,12 +82,11 @@ namespace MGroup.IGA.Elements
 
 		public Tuple<double[], double[]> CalculateStresses(IElement element, double[] localDisplacements, double[] localdDisplacements)
 		{
-			throw new NotImplementedException();
+			return new Tuple<double[], double[]>(new double[0], new double[0]);
 		}
 
 		public void ClearMaterialState()
 		{
-			throw new NotImplementedException();
 		}
 
 		public void ClearMaterialStresses()

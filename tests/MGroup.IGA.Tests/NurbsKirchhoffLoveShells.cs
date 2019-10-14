@@ -2,8 +2,10 @@ using System;
 using System.Linq;
 using MathNet.Numerics.Data.Matlab;
 using MathNet.Numerics.LinearAlgebra;
+using MGroup.Analyzers.NonLinear;
 using MGroup.IGA.Entities.Loads;
 using MGroup.IGA.Postprocessing;
+using MGroup.MSolve.Logging;
 
 namespace MGroup.IGA.Tests
 {
@@ -444,7 +446,6 @@ namespace MGroup.IGA.Tests
 				Utilities.AreValuesEqual(expectedSolution[i], solver.LinearSystems[0].Solution[i], 7);
 		}
 
-
 		[Fact]
 		public void ScordelisLoShell()
 		{
@@ -723,7 +724,6 @@ namespace MGroup.IGA.Tests
 				0.05170964, 1.64E-05, 0.051583222, 4.34E-06, 0.051539906,
 			};
 
-
 			var referenceSolution = 0.3024;
 
 			var cp = model.ControlPointsDictionary.Values.Last();
@@ -734,6 +734,75 @@ namespace MGroup.IGA.Tests
 			for (int i = 0; i < solutionVectorExpected.Length; i++)
 				Assert.True(Utilities.AreValuesEqual(loadVectorExpected[i], solver.LinearSystems[0].RhsVector[i],
 					1e-6));
+		}
+
+		[Fact]
+		public void ScordelisLoShellNL()
+		{
+			var model = new Model();
+			var filename = "ScordelisLoShell";
+			var filepath = $"..\\..\\..\\MGroup.IGA.Tests\\InputFiles\\{filename}.txt";
+			var modelReader = new IsogeometricShellReader(model, filepath);
+			modelReader.CreateShellModelFromFile();
+
+			model.SurfaceLoads.Add(new SurfaceDistributedLoad(-10000, StructuralDof.TranslationY));
+
+			// Rigid diaphragm for AB
+			for (var i = 0; i < 19; i++)
+			{
+				model.ControlPointsDictionary[i * 19].Constrains.Add(new Constraint() { DOF = StructuralDof.TranslationX });
+				model.ControlPointsDictionary[i * 19].Constrains.Add(new Constraint() { DOF = StructuralDof.TranslationY });
+			}
+
+			// Symmetry for CD
+			for (var i = 0; i < 19; i++)
+			{
+				model.ControlPointsDictionary[i * 19 + 18].Constrains.Add(new Constraint() { DOF = StructuralDof.TranslationZ });
+
+				model.AddPenaltyConstrainedDofPair(new PenaltyDofPair(
+					new NodalDof(model.ControlPointsDictionary[i * 19 + 18], StructuralDof.TranslationX),
+					new NodalDof(model.ControlPointsDictionary[i * 19 + 17], StructuralDof.TranslationX)));
+				model.AddPenaltyConstrainedDofPair(new PenaltyDofPair(
+					new NodalDof(model.ControlPointsDictionary[i * 19 + 18], StructuralDof.TranslationY),
+					new NodalDof(model.ControlPointsDictionary[i * 19 + 17], StructuralDof.TranslationY)));
+			}
+
+			// Symmetry for AD
+			for (var j = 0; j < 19; j++)
+			{
+				model.ControlPointsDictionary[j].Constrains.Add(new Constraint() { DOF = StructuralDof.TranslationX });
+				model.AddPenaltyConstrainedDofPair(new PenaltyDofPair(
+					new NodalDof(model.ControlPointsDictionary[j], StructuralDof.TranslationY),
+					new NodalDof(model.ControlPointsDictionary[j + 19], StructuralDof.TranslationY)));
+				model.AddPenaltyConstrainedDofPair(new PenaltyDofPair(
+					new NodalDof(model.ControlPointsDictionary[j], StructuralDof.TranslationZ),
+					new NodalDof(model.ControlPointsDictionary[j + 19], StructuralDof.TranslationZ)));
+			}
+
+			// Solvers
+			var solverBuilder = new SuiteSparseSolver.Builder();
+			ISolver solver = solverBuilder.BuildSolver(model);
+
+			// Structural problem provider
+			var provider = new ProblemStructural(model, solver);
+
+			// Linear static analysis
+			var newtonRaphsonBuilder = new LoadControlAnalyzer.Builder(model, solver, provider, 1000);
+			var childAnalyzer = newtonRaphsonBuilder.Build();
+			var parentAnalyzer = new StaticAnalyzer(model, solver, provider, childAnalyzer);
+
+			var logger = new TotalLoadsDisplacementsPerIncrementLog(model.PatchesDictionary[0], 1000,
+				model.ControlPointsDictionary.Values.Last(), StructuralDof.TranslationY, $"..\\..\\..\\MGroup.IGA.Tests\\OutputFiles\\ScordelisLog.txt");
+			childAnalyzer.IncrementalLogs.Add(0, logger);
+
+			// Run the analysis
+			parentAnalyzer.Initialize();
+			parentAnalyzer.Solve();
+
+			var referenceSolution = 0.3024;
+
+			var cp = model.ControlPointsDictionary.Values.Last();
+			var dofA = model.GlobalDofOrdering.GlobalFreeDofs[cp, StructuralDof.TranslationY];
 		}
 
 		[Fact]
@@ -806,7 +875,6 @@ namespace MGroup.IGA.Tests
 				Assert.True(Utilities.AreValuesEqual(solutionVectorExpected.At(0, i), solver.LinearSystems[0].Solution[i],
 					1e-9));
 		}
-
 
 		[Fact]
 		public void IsogeometricSquareShellWithDistributedLoad()
@@ -918,7 +986,5 @@ namespace MGroup.IGA.Tests
 				Assert.True(Utilities.AreValuesEqual(solutionVectorExpected.At(0, i), solver.LinearSystems[0].Solution[i],
 					1e-9));
 		}
-
-
 	}
 }

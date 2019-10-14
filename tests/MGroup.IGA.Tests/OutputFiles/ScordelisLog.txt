@@ -1,0 +1,1 @@
+Increment, Iteration, ResidualNorm, Total displacement (Node 360 - dof TranslationY), Total internal force (Node 360 - dof TranslationY)
