@@ -8,6 +8,12 @@ namespace MGroup.IGA.Readers
 	using MGroup.LinearAlgebra.Vectors;
 	using MGroup.Materials;
 
+	public enum GeometricalFormulation
+	{
+		Linear,
+		NonLinear
+	}
+
 	/// <summary>
 	/// Reader for custom isogeometric shell model files.
 	/// </summary>
@@ -40,11 +46,11 @@ namespace MGroup.IGA.Readers
 		}
 
 		private Dictionary<int, int[]> ControlPointIDsDictionary = new Dictionary<int, int[]>();
-
+		
 		/// <summary>
 		/// Creates model from custom isogeometric shell file.
 		/// </summary>
-		public void CreateShellModelFromFile()
+		public void CreateShellModelFromFile(GeometricalFormulation formulation)
 		{
 			char[] delimeters = { ' ', '=', '\t' };
 			Attributes? name = null;
@@ -177,7 +183,7 @@ namespace MGroup.IGA.Readers
 						for (int j = 0; j < ControlPointIDsDictionary[patchID].Length; j++)
 							((List<ControlPoint>)_model.PatchesDictionary[patchID].ControlPoints).Add(_model.ControlPointsDictionary[ControlPointIDsDictionary[patchID][j]]);
 
-						_model.PatchesDictionary[patchID].CreateNurbsShell();
+						_model.PatchesDictionary[patchID].CreateNurbsShell(formulation);
 						foreach (var element in _model.PatchesDictionary[patchID].Elements)
 							_model.ElementsDictionary.Add(counterElementID++, element);
 						return;

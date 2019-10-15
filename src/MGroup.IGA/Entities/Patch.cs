@@ -12,6 +12,7 @@ namespace MGroup.IGA.Entities
 	using MGroup.MSolve.Discretization.Commons;
 	using MGroup.MSolve.Discretization.FreedomDegrees;
 	using MGroup.MSolve.Discretization.Interfaces;
+	using Readers;
 
 	/// <summary>
 	/// Patch entity of Isogeometric analysis that is similar to FEM Subdomain.
@@ -253,10 +254,10 @@ namespace MGroup.IGA.Entities
 		/// </summary>
 		public void ScaleConstraints(double scalingFactor) => Constraints.ModifyValues((u) => scalingFactor * u);
 
-		internal void CreateNurbsShell()
+		internal void CreateNurbsShell(GeometricalFormulation formulation)
 		{
 			BuildEdgesDictionary();
-			CreateNURBSShells();
+			CreateNURBSShells(formulation);
 		}
 
 		private static List<Knot> CreateKnots2D(Vector singleKnotValuesKsi, Vector singleKnotValuesHeta)
@@ -1006,7 +1007,7 @@ namespace MGroup.IGA.Entities
 			#endregion Elements
 		}
 
-		private void CreateNURBSShells()
+		private void CreateNURBSShells(GeometricalFormulation formulation)
 		{
 			#region Knots
 
@@ -1019,7 +1020,7 @@ namespace MGroup.IGA.Entities
 
 			#region Elements
 
-			CreateShellElements(singleKnotValuesKsi, singleKnotValuesHeta, knots);
+			CreateShellElements(singleKnotValuesKsi, singleKnotValuesHeta, knots, formulation);
 
 			#endregion Elements
 		}
@@ -1037,7 +1038,7 @@ namespace MGroup.IGA.Entities
 			BuildFacesDictionary();
 		}
 
-		private void CreateShellElements(Vector singleKnotValuesKsi, Vector singleKnotValuesHeta, List<Knot> knots)
+		private void CreateShellElements(Vector singleKnotValuesKsi, Vector singleKnotValuesHeta, List<Knot> knots, GeometricalFormulation formulation)
 		{
 			Vector multiplicityKsi = KnotValueVectorKsi.RemoveDuplicatesFindMultiplicity()[1];
 			Vector multiplicityHeta = KnotValueVectorHeta.RemoveDuplicatesFindMultiplicity()[1];
@@ -1089,26 +1090,44 @@ namespace MGroup.IGA.Entities
 					}
 
 					int elementID = i * numberOfElementsHeta + j;
-					Element element = new NurbsKirchhoffLoveShellElementNL(new ShellElasticMaterial2D()
+					Element element = null;
+					switch (formulation)
 					{
-						YoungModulus = 2.1e10,
-						PoissonRatio = 0.0
-					}, knotsOfElement, elementControlPoints.ToList(), this, 0.076)
-					{
-						ID = elementID,
-						Patch = this,
-						Thickness = 0.076,
-						ElementType = new NurbsKirchhoffLoveShellElementNL(new ShellElasticMaterial2D()
-						{
-							YoungModulus = 2.1e10,
-							PoissonRatio = 0.0,
-						}, knotsOfElement, elementControlPoints.ToList(), this, 0.076)
-						{
-							ID = elementID,
-							Patch = this,
-							Thickness = 0.076
-						}
-					};
+						case GeometricalFormulation.Linear:
+							element = new NurbsKirchhoffLoveShellElement()
+							{
+								ID = elementID,
+								Patch = this,
+								ElementType = new NurbsKirchhoffLoveShellElement()
+							};
+							element.AddKnots(knotsOfElement);
+							element.AddControlPoints(elementControlPoints);
+
+							break;
+						case GeometricalFormulation.NonLinear:
+							element = new NurbsKirchhoffLoveShellElementNL(new ShellElasticMaterial2D()
+							{
+								YoungModulus = this.Material.YoungModulus,
+								PoissonRatio = this.Material.PoissonRatio
+							}, knotsOfElement, elementControlPoints, this, this.Thickness)
+							{
+								ID = elementID,
+								Patch = this,
+								Thickness = this.Thickness,
+								ElementType = new NurbsKirchhoffLoveShellElementNL(new ShellElasticMaterial2D()
+								{
+									YoungModulus = this.Material.YoungModulus,
+									PoissonRatio = this.Material.PoissonRatio
+								}, knotsOfElement, elementControlPoints.ToList(), this, this.Thickness)
+								{
+									ID = elementID,
+									Patch = this,
+									Thickness = this.Thickness
+								}
+							};
+							break;
+					}
+
 					Elements.Add(element);
 				}
 			}

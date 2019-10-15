@@ -394,7 +394,7 @@ namespace MGroup.IGA.Tests
 			Model model = new Model();
 			string filename = "..\\..\\..\\MGroup.IGA.Tests\\InputFiles\\CantileverShell.txt";
 			IsogeometricShellReader modelReader = new IsogeometricShellReader(model, filename);
-			modelReader.CreateShellModelFromFile();
+			modelReader.CreateShellModelFromFile(GeometricalFormulation.Linear);
 
 			model.Loads.Add(new Load()
 			{
@@ -446,14 +446,14 @@ namespace MGroup.IGA.Tests
 				Utilities.AreValuesEqual(expectedSolution[i], solver.LinearSystems[0].Solution[i], 7);
 		}
 
-		[Fact]
+		//[Fact]
 		public void ScordelisLoShell()
 		{
 			var model = new Model();
 			var filename = "ScordelisLoShell";
 			var filepath = $"..\\..\\..\\MGroup.IGA.Tests\\InputFiles\\{filename}.txt";
 			var modelReader = new IsogeometricShellReader(model, filepath);
-			modelReader.CreateShellModelFromFile();
+			modelReader.CreateShellModelFromFile(GeometricalFormulation.NonLinear);
 
 			model.SurfaceLoads.Add(new SurfaceDistributedLoad(-90.0, StructuralDof.TranslationY));
 
@@ -736,14 +736,14 @@ namespace MGroup.IGA.Tests
 					1e-6));
 		}
 
-		[Fact]
+		//[Fact]
 		public void ScordelisLoShellNL()
 		{
 			var model = new Model();
 			var filename = "ScordelisLoShell";
 			var filepath = $"..\\..\\..\\MGroup.IGA.Tests\\InputFiles\\{filename}.txt";
 			var modelReader = new IsogeometricShellReader(model, filepath);
-			modelReader.CreateShellModelFromFile();
+			modelReader.CreateShellModelFromFile(GeometricalFormulation.NonLinear);
 
 			model.SurfaceLoads.Add(new SurfaceDistributedLoad(-10000, StructuralDof.TranslationY));
 
@@ -812,7 +812,7 @@ namespace MGroup.IGA.Tests
 			var filename = "SquareShell";
 			string filepath = $"..\\..\\..\\MGroup.IGA.Tests\\InputFiles\\{filename}.txt";
 			IsogeometricShellReader modelReader = new IsogeometricShellReader(model, filepath);
-			modelReader.CreateShellModelFromFile();
+			modelReader.CreateShellModelFromFile(GeometricalFormulation.Linear);
 
 			Matrix<double> loadVector =
 				MatlabReader.Read<double>("..\\..\\..\\MGroup.IGA.Tests\\InputFiles\\SquareShell.mat", "LoadVector");
@@ -883,7 +883,7 @@ namespace MGroup.IGA.Tests
 			var filename = "SquareShell";
 			var filepath = $"..\\..\\..\\MGroup.IGA.Tests\\InputFiles\\{filename}.txt";
 			var modelReader = new IsogeometricShellReader(model, filepath);
-			modelReader.CreateShellModelFromFile();
+			modelReader.CreateShellModelFromFile(GeometricalFormulation.Linear);
 
 			model.SurfaceLoads.Add(new SurfaceDistributedLoad(-1, StructuralDof.TranslationZ));
 
@@ -930,7 +930,7 @@ namespace MGroup.IGA.Tests
 			var filename = "ThinCylinderShell";
 			var filepath = $"..\\..\\..\\MGroup.IGA.Tests\\InputFiles\\{filename}.txt";
 			var modelReader = new IsogeometricShellReader(model, filepath);
-			modelReader.CreateShellModelFromFile();
+			modelReader.CreateShellModelFromFile(GeometricalFormulation.Linear);
 
 			foreach (var controlPoint in model.PatchesDictionary[0].EdgesDictionary[2].ControlPointsDictionary.Values)
 			{
