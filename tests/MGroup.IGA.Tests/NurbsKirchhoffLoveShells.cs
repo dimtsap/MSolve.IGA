@@ -10,7 +10,8 @@ using MGroup.MSolve.Logging;
 namespace MGroup.IGA.Tests
 {
 	using System.Collections.Generic;
-
+	using System.Globalization;
+	using System.IO;
 	using MGroup.Analyzers;
 	using MGroup.IGA.Elements;
 	using MGroup.IGA.Entities;
@@ -446,7 +447,7 @@ namespace MGroup.IGA.Tests
 				Utilities.AreValuesEqual(expectedSolution[i], solver.LinearSystems[0].Solution[i], 7);
 		}
 
-		//[Fact]
+		[Fact]
 		public void ScordelisLoShell()
 		{
 			var model = new Model();
@@ -460,14 +461,14 @@ namespace MGroup.IGA.Tests
 			// Rigid diaphragm for AB
 			for (var i = 0; i < 19; i++)
 			{
-				model.ControlPointsDictionary[i * 19].Constrains.Add(new Constraint() { DOF = StructuralDof.TranslationX });
-				model.ControlPointsDictionary[i * 19].Constrains.Add(new Constraint() { DOF = StructuralDof.TranslationY });
+				model.ControlPointsDictionary[i * 19].Constraints.Add(new Constraint() { DOF = StructuralDof.TranslationX });
+				model.ControlPointsDictionary[i * 19].Constraints.Add(new Constraint() { DOF = StructuralDof.TranslationY });
 			}
 
 			// Symmetry for CD
 			for (var i = 0; i < 19; i++)
 			{
-				model.ControlPointsDictionary[i * 19 + 18].Constrains.Add(new Constraint() { DOF = StructuralDof.TranslationZ });
+				model.ControlPointsDictionary[i * 19 + 18].Constraints.Add(new Constraint() { DOF = StructuralDof.TranslationZ });
 
 				//model.ControlPointsDictionary[i * 19 + 17].Constrains.Add(new Constraint() { DOF = StructuralDof.TranslationZ });
 				model.AddPenaltyConstrainedDofPair(new PenaltyDofPair(
@@ -481,7 +482,7 @@ namespace MGroup.IGA.Tests
 			// Symmetry for AD
 			for (var j = 0; j < 19; j++)
 			{
-				model.ControlPointsDictionary[j].Constrains.Add(new Constraint() { DOF = StructuralDof.TranslationX });
+				model.ControlPointsDictionary[j].Constraints.Add(new Constraint() { DOF = StructuralDof.TranslationX });
 				//model.ControlPointsDictionary[j + 19].Constrains.Add(new Constraint() { DOF = StructuralDof.TranslationX });
 				model.AddPenaltyConstrainedDofPair(new PenaltyDofPair(
 					new NodalDof(model.ControlPointsDictionary[j], StructuralDof.TranslationY),
@@ -736,28 +737,28 @@ namespace MGroup.IGA.Tests
 					1e-6));
 		}
 
-		//[Fact]
+		[Fact]
 		public void ScordelisLoShellNL()
 		{
 			var model = new Model();
 			var filename = "ScordelisLoShell";
-			var filepath = $"..\\..\\..\\MGroup.IGA.Tests\\InputFiles\\{filename}.txt";
+			var filepath = Path.Combine(Directory.GetCurrentDirectory(),"InputFiles",$"{filename}.txt").ToString(CultureInfo.InvariantCulture);
 			var modelReader = new IsogeometricShellReader(model, filepath);
 			modelReader.CreateShellModelFromFile(GeometricalFormulation.NonLinear);
 
-			model.SurfaceLoads.Add(new SurfaceDistributedLoad(-10000, StructuralDof.TranslationY));
+			model.SurfaceLoads.Add(new SurfaceDistributedLoad(-5000, StructuralDof.TranslationY));
 
 			// Rigid diaphragm for AB
 			for (var i = 0; i < 19; i++)
 			{
-				model.ControlPointsDictionary[i * 19].Constrains.Add(new Constraint() { DOF = StructuralDof.TranslationX });
-				model.ControlPointsDictionary[i * 19].Constrains.Add(new Constraint() { DOF = StructuralDof.TranslationY });
+				model.ControlPointsDictionary[i * 19].Constraints.Add(new Constraint() { DOF = StructuralDof.TranslationX });
+				model.ControlPointsDictionary[i * 19].Constraints.Add(new Constraint() { DOF = StructuralDof.TranslationY });
 			}
 
 			// Symmetry for CD
 			for (var i = 0; i < 19; i++)
 			{
-				model.ControlPointsDictionary[i * 19 + 18].Constrains.Add(new Constraint() { DOF = StructuralDof.TranslationZ });
+				model.ControlPointsDictionary[i * 19 + 18].Constraints.Add(new Constraint() { DOF = StructuralDof.TranslationZ });
 
 				model.AddPenaltyConstrainedDofPair(new PenaltyDofPair(
 					new NodalDof(model.ControlPointsDictionary[i * 19 + 18], StructuralDof.TranslationX),
@@ -770,7 +771,7 @@ namespace MGroup.IGA.Tests
 			// Symmetry for AD
 			for (var j = 0; j < 19; j++)
 			{
-				model.ControlPointsDictionary[j].Constrains.Add(new Constraint() { DOF = StructuralDof.TranslationX });
+				model.ControlPointsDictionary[j].Constraints.Add(new Constraint() { DOF = StructuralDof.TranslationX });
 				model.AddPenaltyConstrainedDofPair(new PenaltyDofPair(
 					new NodalDof(model.ControlPointsDictionary[j], StructuralDof.TranslationY),
 					new NodalDof(model.ControlPointsDictionary[j + 19], StructuralDof.TranslationY)));
@@ -780,18 +781,18 @@ namespace MGroup.IGA.Tests
 			}
 
 			// Solvers
-			var solverBuilder = new SuiteSparseSolver.Builder();
+			var solverBuilder = new SkylineSolver.Builder();
 			ISolver solver = solverBuilder.BuildSolver(model);
 
 			// Structural problem provider
 			var provider = new ProblemStructural(model, solver);
 
 			// Linear static analysis
-			var newtonRaphsonBuilder = new LoadControlAnalyzer.Builder(model, solver, provider, 1000);
+			var newtonRaphsonBuilder = new LoadControlAnalyzer.Builder(model, solver, provider, 100);
 			var childAnalyzer = newtonRaphsonBuilder.Build();
 			var parentAnalyzer = new StaticAnalyzer(model, solver, provider, childAnalyzer);
 
-			var logger = new TotalLoadsDisplacementsPerIncrementLog(model.PatchesDictionary[0], 1000,
+			var logger = new TotalLoadsDisplacementsPerIncrementLog(model.PatchesDictionary[0], 100,
 				model.ControlPointsDictionary.Values.Last(), StructuralDof.TranslationY, $"..\\..\\..\\MGroup.IGA.Tests\\OutputFiles\\ScordelisLog.txt");
 			childAnalyzer.IncrementalLogs.Add(0, logger);
 
@@ -891,9 +892,9 @@ namespace MGroup.IGA.Tests
 			{
 				foreach (var controlPoint in edge.ControlPointsDictionary.Values)
 				{
-					model.ControlPointsDictionary[controlPoint.ID].Constrains.Add(new Constraint() { DOF = StructuralDof.TranslationX });
-					model.ControlPointsDictionary[controlPoint.ID].Constrains.Add(new Constraint() { DOF = StructuralDof.TranslationY });
-					model.ControlPointsDictionary[controlPoint.ID].Constrains.Add(new Constraint() { DOF = StructuralDof.TranslationZ });
+					model.ControlPointsDictionary[controlPoint.ID].Constraints.Add(new Constraint() { DOF = StructuralDof.TranslationX });
+					model.ControlPointsDictionary[controlPoint.ID].Constraints.Add(new Constraint() { DOF = StructuralDof.TranslationY });
+					model.ControlPointsDictionary[controlPoint.ID].Constraints.Add(new Constraint() { DOF = StructuralDof.TranslationZ });
 				}
 			}
 

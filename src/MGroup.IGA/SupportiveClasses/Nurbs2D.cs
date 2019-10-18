@@ -44,12 +44,12 @@ namespace MGroup.IGA.SupportiveClasses
 			int numberOfGPHeta = 1;
 			int numberOfElementControlPoints = (degreeKsi + 1) * (degreeHeta + 1);
 
-			NurbsValues = Matrix.CreateZero(numberOfElementControlPoints, 1);
-			NurbsDerivativeValuesKsi = Matrix.CreateZero(numberOfElementControlPoints, 1);
-			NurbsDerivativeValuesHeta = Matrix.CreateZero(numberOfElementControlPoints, 1);
-			NurbsSecondDerivativeValueKsi = Matrix.CreateZero(numberOfElementControlPoints, 1);
-			NurbsSecondDerivativeValueHeta = Matrix.CreateZero(numberOfElementControlPoints, 1);
-			NurbsSecondDerivativeValueKsiHeta = Matrix.CreateZero(numberOfElementControlPoints, 1);
+			NurbsValues = new double[numberOfElementControlPoints, 1];
+			NurbsDerivativeValuesKsi = new double[numberOfElementControlPoints, 1];
+			NurbsDerivativeValuesHeta = new double[numberOfElementControlPoints, 1];
+			NurbsSecondDerivativeValueKsi = new double[numberOfElementControlPoints, 1];
+			NurbsSecondDerivativeValueHeta = new double[numberOfElementControlPoints, 1];
+			NurbsSecondDerivativeValueKsiHeta = new double[numberOfElementControlPoints, 1];
 
 			for (int i = 0; i < numberOfGPKsi; i++)
 			{
@@ -172,12 +172,12 @@ namespace MGroup.IGA.SupportiveClasses
 			int numberOfGPHeta = 1;
 			int numberOfElementControlPoints = controlPoints.Count;
 
-			NurbsValues = Matrix.CreateZero(numberOfElementControlPoints, 1);
-			NurbsDerivativeValuesKsi = Matrix.CreateZero(numberOfElementControlPoints, 1);
-			NurbsDerivativeValuesHeta = Matrix.CreateZero(numberOfElementControlPoints, 1);
-			NurbsSecondDerivativeValueKsi = Matrix.CreateZero(numberOfElementControlPoints, 1);
-			NurbsSecondDerivativeValueHeta = Matrix.CreateZero(numberOfElementControlPoints, 1);
-			NurbsSecondDerivativeValueKsiHeta = Matrix.CreateZero(numberOfElementControlPoints, 1);
+			NurbsValues = new double[numberOfElementControlPoints, 1];
+			NurbsDerivativeValuesKsi = new double[numberOfElementControlPoints, 1];
+			NurbsDerivativeValuesHeta = new double[numberOfElementControlPoints, 1];
+			NurbsSecondDerivativeValueKsi = new double[numberOfElementControlPoints, 1];
+			NurbsSecondDerivativeValueHeta = new double[numberOfElementControlPoints, 1];
+			NurbsSecondDerivativeValueKsiHeta = new double[numberOfElementControlPoints, 1];
 
 			for (int i = 0; i < numberOfGPKsi; i++)
 			{
@@ -307,12 +307,12 @@ namespace MGroup.IGA.SupportiveClasses
 			int supportHeta = element.Patch.DegreeHeta + 1;
 			int numberOfElementControlPoints = supportKsi * supportHeta;
 
-			NurbsValues = Matrix.CreateZero(numberOfElementControlPoints, gaussPoints.Count);
-			NurbsDerivativeValuesKsi = Matrix.CreateZero(numberOfElementControlPoints, gaussPoints.Count);
-			NurbsDerivativeValuesHeta = Matrix.CreateZero(numberOfElementControlPoints, gaussPoints.Count);
-			NurbsSecondDerivativeValueKsi = Matrix.CreateZero(numberOfElementControlPoints, gaussPoints.Count);
-			NurbsSecondDerivativeValueHeta = Matrix.CreateZero(numberOfElementControlPoints, gaussPoints.Count);
-			NurbsSecondDerivativeValueKsiHeta = Matrix.CreateZero(numberOfElementControlPoints, gaussPoints.Count);
+			NurbsValues = new double[numberOfElementControlPoints, gaussPoints.Count];
+			NurbsDerivativeValuesKsi = new double[numberOfElementControlPoints, gaussPoints.Count];
+			NurbsDerivativeValuesHeta = new double[numberOfElementControlPoints, gaussPoints.Count];
+			NurbsSecondDerivativeValueKsi = new double[numberOfElementControlPoints, gaussPoints.Count];
+			NurbsSecondDerivativeValueHeta = new double[numberOfElementControlPoints, gaussPoints.Count];
+			NurbsSecondDerivativeValueKsiHeta = new double[numberOfElementControlPoints, gaussPoints.Count];
 
 			for (int i = 0; i < supportKsi; i++)
 			{
@@ -429,12 +429,12 @@ namespace MGroup.IGA.SupportiveClasses
 			int supportHeta = parametricGaussPointHeta.Length;
 			int numberOfElementControlPoints = (element.Patch.DegreeKsi + 1) * (element.Patch.DegreeHeta + 1);
 
-			NurbsValues = Matrix.CreateZero(numberOfElementControlPoints, parametricPointsCount);
-			NurbsDerivativeValuesKsi = Matrix.CreateZero(numberOfElementControlPoints, parametricPointsCount);
-			NurbsDerivativeValuesHeta = Matrix.CreateZero(numberOfElementControlPoints, parametricPointsCount);
-			NurbsSecondDerivativeValueKsi = Matrix.CreateZero(numberOfElementControlPoints, parametricPointsCount);
-			NurbsSecondDerivativeValueHeta = Matrix.CreateZero(numberOfElementControlPoints, parametricPointsCount);
-			NurbsSecondDerivativeValueKsiHeta = Matrix.CreateZero(numberOfElementControlPoints, parametricPointsCount);
+			NurbsValues = new double[numberOfElementControlPoints, parametricPointsCount];
+			NurbsDerivativeValuesKsi = new double[numberOfElementControlPoints, parametricPointsCount];
+			NurbsDerivativeValuesHeta = new double[numberOfElementControlPoints, parametricPointsCount];
+			NurbsSecondDerivativeValueKsi = new double[numberOfElementControlPoints, parametricPointsCount];
+			NurbsSecondDerivativeValueHeta = new double[numberOfElementControlPoints, parametricPointsCount];
+			NurbsSecondDerivativeValueKsiHeta = new double[numberOfElementControlPoints, parametricPointsCount];
 
 			for (int i = 0; i < supportKsi; i++)
 			{
@@ -567,12 +567,12 @@ namespace MGroup.IGA.SupportiveClasses
 			int supportHeta = degreeHeta + 1;
 			int numberOfElementControlPoints = supportKsi * supportHeta;
 
-			NurbsValues = Matrix.CreateZero(numberOfElementControlPoints, gaussPoints.Count);
-			NurbsDerivativeValuesKsi = Matrix.CreateZero(numberOfElementControlPoints, gaussPoints.Count);
-			NurbsDerivativeValuesHeta = Matrix.CreateZero(numberOfElementControlPoints, gaussPoints.Count);
-			NurbsSecondDerivativeValueKsi = Matrix.CreateZero(numberOfElementControlPoints, gaussPoints.Count);
-			NurbsSecondDerivativeValueHeta = Matrix.CreateZero(numberOfElementControlPoints, gaussPoints.Count);
-			NurbsSecondDerivativeValueKsiHeta = Matrix.CreateZero(numberOfElementControlPoints, gaussPoints.Count);
+			NurbsValues = new double[numberOfElementControlPoints, gaussPoints.Count];
+			NurbsDerivativeValuesKsi = new double[numberOfElementControlPoints, gaussPoints.Count];
+			NurbsDerivativeValuesHeta = new double[numberOfElementControlPoints, gaussPoints.Count];
+			NurbsSecondDerivativeValueKsi = new double[numberOfElementControlPoints, gaussPoints.Count];
+			NurbsSecondDerivativeValueHeta = new double[numberOfElementControlPoints, gaussPoints.Count];
+			NurbsSecondDerivativeValueKsiHeta = new double[numberOfElementControlPoints, gaussPoints.Count];
 
 			for (int i = 0; i < supportKsi; i++)
 			{
@@ -678,36 +678,36 @@ namespace MGroup.IGA.SupportiveClasses
 		/// <see cref="Matrix"/> containing NURBS shape function derivatives per Heta.
 		/// Row represent Control Points, while columns Gauss Points.
 		/// </summary>
-		public Matrix NurbsDerivativeValuesHeta { get; private set; }
+		public double[,] NurbsDerivativeValuesHeta { get; private set; }
 
 		/// <summary>
 		/// <see cref="Matrix"/> containing NURBS shape function derivatives per Ksi.
 		/// Row represent Control Points, while columns Gauss Points.
 		/// </summary>
-		public Matrix NurbsDerivativeValuesKsi { get; private set; }
+		public double[,] NurbsDerivativeValuesKsi { get; private set; }
 
 		/// <summary>
 		/// <see cref="Matrix"/> containing NURBS shape function mixed second derivatives per Ksi and Heta.
 		/// Row represent Control Points, while columns Gauss Points.
 		/// </summary>
-		public Matrix NurbsSecondDerivativeValueHeta { get; private set; }
+		public double[,] NurbsSecondDerivativeValueHeta { get; private set; }
 
 		/// <summary>
 		/// <see cref="Matrix"/> containing NURBS shape function second derivatives per Ksi.
 		/// Row represent Control Points, while columns Gauss Points.
 		/// </summary>
-		public Matrix NurbsSecondDerivativeValueKsi { get; private set; }
+		public double[,] NurbsSecondDerivativeValueKsi { get; private set; }
 
 		/// <summary>
 		/// <see cref="Matrix"/> containing NURBS shape function second derivatives per Ksi and Heta.
 		/// Row represent Control Points, while columns Gauss Points.
 		/// </summary>
-		public Matrix NurbsSecondDerivativeValueKsiHeta { get; private set; }
+		public double[,] NurbsSecondDerivativeValueKsiHeta { get; private set; }
 
 		/// <summary>
 		/// <see cref="Matrix"/> containing NURBS shape functions.
 		/// Row represent Control Points, while columns Gauss Points.
 		/// </summary>
-		public Matrix NurbsValues { get; private set; }
+		public double[,] NurbsValues { get; private set; }
 	}
 }

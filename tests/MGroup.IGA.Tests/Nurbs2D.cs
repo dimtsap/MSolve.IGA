@@ -270,7 +270,7 @@ namespace MGroup.IGA.Tests
 			for (var p = 0; p < 16; p++)
 			{
 				var sum = 0.0;
-				for (var f = 0; f < nurbs2D.NurbsValues.NumRows; f++)
+				for (var f = 0; f < nurbs2D.NurbsValues.GetLength(0); f++)
 					sum += nurbs2D.NurbsValues[f, p];
 				Assert.True(Utilities.AreValuesEqual(1.0, sum, Tolerance));
 			}

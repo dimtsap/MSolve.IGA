@@ -4,6 +4,7 @@ namespace MGroup.IGA.Entities
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Data;
 	using System.Linq;
 
 	using MGroup.IGA.Elements;
@@ -218,6 +219,7 @@ namespace MGroup.IGA.Entities
 		/// </summary>
 		public IVector GetRhsFromSolution(IVectorView solution, IVectorView dSolution)
 		{
+			UpdateControlPointCoordinates(dSolution);
 			var forces = Vector.CreateZero(FreeDofOrdering.NumFreeDofs);
 			foreach (Element element in Elements)
 			{
@@ -229,7 +231,13 @@ namespace MGroup.IGA.Entities
 				var f = element.ElementType.CalculateForces(element, localSolution, localdSolution);
 				FreeDofOrdering.AddVectorElementToSubdomain(element, f, forces);
 			}
+
 			return forces;
+		}
+
+		private void UpdateControlPointCoordinates(IVectorView dSolution)
+		{
+			
 		}
 
 		/// <summary>

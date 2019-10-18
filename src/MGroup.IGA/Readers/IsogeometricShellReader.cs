@@ -46,7 +46,7 @@ namespace MGroup.IGA.Readers
 		}
 
 		private Dictionary<int, int[]> ControlPointIDsDictionary = new Dictionary<int, int[]>();
-		
+
 		/// <summary>
 		/// Creates model from custom isogeometric shell file.
 		/// </summary>
