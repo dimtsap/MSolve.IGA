@@ -23,7 +23,7 @@ namespace MGroup.IGA.Elements
 	/// </summary>
 	public class NurbsElement1D : Element, IStructuralIsogeometricElement
 	{
-		protected static readonly IDofType[] ControlPointDofTypes = { StructuralDof.TranslationX };
+		protected static readonly IDofType[] ControlPointDofTypes = { StructuralDof.TranslationX, StructuralDof.TranslationY, StructuralDof.TranslationZ };
 		private IDofType[][] _dofTypes;
 
 		/// <summary>
@@ -311,27 +311,48 @@ namespace MGroup.IGA.Elements
 
 					}
 
-					if (!element.Model.GlobalDofOrdering.GlobalFreeDofs.Contains(
+					if (element.Model.GlobalDofOrdering.GlobalFreeDofs.Contains(
 						elementControlPoints[k],
 						StructuralDof.TranslationY))
 					{
-						continue;
+						var dofIDY =
+							element.Model.GlobalDofOrdering.GlobalFreeDofs[
+								elementControlPoints[k],
+								StructuralDof.TranslationY];
+						if (neumannLoad.ContainsKey(dofIDY))
+						{
+							neumannLoad[dofIDY] += jacdet * gaussPoints[j].WeightFactor * nurbs.NurbsValues[k, j] *
+							                       loadGaussPoint[1];
+						}
+						else
+						{
+							neumannLoad.Add(dofIDY,
+								jacdet * gaussPoints[j].WeightFactor * nurbs.NurbsValues[k, j] * loadGaussPoint[1]);
+						}
 					}
 
-					var dofIDY =
-						element.Model.GlobalDofOrdering.GlobalFreeDofs[
-							elementControlPoints[k],
-							StructuralDof.TranslationY];
-					if (neumannLoad.ContainsKey(dofIDY))
+
+					if (element.Model.GlobalDofOrdering.GlobalFreeDofs.Contains(
+						elementControlPoints[k],
+						StructuralDof.TranslationZ))
 					{
-						neumannLoad[dofIDY] += jacdet * gaussPoints[j].WeightFactor * nurbs.NurbsValues[k, j] *
-											   loadGaussPoint[1];
+						var dofIDZ =
+							element.Model.GlobalDofOrdering.GlobalFreeDofs[
+								elementControlPoints[k],
+								StructuralDof.TranslationZ];
+						if (neumannLoad.ContainsKey(dofIDZ))
+						{
+							neumannLoad[dofIDZ] += jacdet * gaussPoints[j].WeightFactor * nurbs.NurbsValues[k, j] *
+							                       loadGaussPoint[2];
+						}
+						else
+						{
+							neumannLoad.Add(dofIDZ,
+								jacdet * gaussPoints[j].WeightFactor * nurbs.NurbsValues[k, j] * loadGaussPoint[2]);
+						}
 					}
-					else
-					{
-						neumannLoad.Add(dofIDY,
-							jacdet * gaussPoints[j].WeightFactor * nurbs.NurbsValues[k, j] * loadGaussPoint[1]);
-					}
+
+
 				}
 			}
 		}

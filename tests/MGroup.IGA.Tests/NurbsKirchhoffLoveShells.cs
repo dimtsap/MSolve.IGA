@@ -451,10 +451,10 @@ namespace MGroup.IGA.Tests
 		public void ScordelisLoShell()
 		{
 			var model = new Model();
-			var filename = "ScordelisLoShell";
+			var filename = "ScordelisLoShellLinear";
 			var filepath = $"..\\..\\..\\MGroup.IGA.Tests\\InputFiles\\{filename}.txt";
 			var modelReader = new IsogeometricShellReader(model, filepath);
-			modelReader.CreateShellModelFromFile(GeometricalFormulation.NonLinear);
+			modelReader.CreateShellModelFromFile(GeometricalFormulation.Linear);
 
 			model.SurfaceLoads.Add(new SurfaceDistributedLoad(-90.0, StructuralDof.TranslationY));
 

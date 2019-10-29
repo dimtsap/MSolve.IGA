@@ -319,10 +319,16 @@ namespace MGroup.IGA.Elements
 				var auxVector = surfaceBasisVector2.CrossProduct(surfaceBasisVector3);
 				auxVector.ScaleIntoThis(nurbs.NurbsDerivativeValuesKsi[column / 3, j]);
 				BI1.AddIntoThis(auxVector);
+				
 				BI1.ScaleIntoThis(surfaceBasisVector3.DotProduct(surfaceBasisVectorDerivative1));
 				auxVector = surfaceBasisVector1.CrossProduct(surfaceBasisVectorDerivative1);
 				auxVector.ScaleIntoThis(nurbs.NurbsDerivativeValuesHeta[column / 3, j]);
 				BI1.AddIntoThis(auxVector);
+
+				auxVector = surfaceBasisVectorDerivative1.CrossProduct(surfaceBasisVector2);
+				auxVector.ScaleIntoThis(nurbs.NurbsDerivativeValuesKsi[column / 3, j]);
+				BI1.AddIntoThis(auxVector);
+
 				BI1.ScaleIntoThis(1 / J1);
 				auxVector[0] = surfaceBasisVector3[0];
 				auxVector[1] = surfaceBasisVector3[1];

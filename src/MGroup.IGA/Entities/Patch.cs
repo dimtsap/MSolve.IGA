@@ -219,7 +219,6 @@ namespace MGroup.IGA.Entities
 		/// </summary>
 		public IVector GetRhsFromSolution(IVectorView solution, IVectorView dSolution)
 		{
-			UpdateControlPointCoordinates(dSolution);
 			var forces = Vector.CreateZero(FreeDofOrdering.NumFreeDofs);
 			foreach (Element element in Elements)
 			{
@@ -233,11 +232,6 @@ namespace MGroup.IGA.Entities
 			}
 
 			return forces;
-		}
-
-		private void UpdateControlPointCoordinates(IVectorView dSolution)
-		{
-			
 		}
 
 		/// <summary>
@@ -1113,7 +1107,7 @@ namespace MGroup.IGA.Entities
 
 							break;
 						case GeometricalFormulation.NonLinear:
-							element = new NurbsKirchhoffLoveShellElementNL(new ShellElasticMaterial2D()
+							element = new NurbsKirchhoffLoveShellElementNL(new ShellElasticMaterial2Dtransformationb()
 							{
 								YoungModulus = this.Material.YoungModulus,
 								PoissonRatio = this.Material.PoissonRatio
@@ -1122,7 +1116,7 @@ namespace MGroup.IGA.Entities
 								ID = elementID,
 								Patch = this,
 								Thickness = this.Thickness,
-								ElementType = new NurbsKirchhoffLoveShellElementNL(new ShellElasticMaterial2D()
+								ElementType = new NurbsKirchhoffLoveShellElementNL(new ShellElasticMaterial2Dtransformationb()
 								{
 									YoungModulus = this.Material.YoungModulus,
 									PoissonRatio = this.Material.PoissonRatio

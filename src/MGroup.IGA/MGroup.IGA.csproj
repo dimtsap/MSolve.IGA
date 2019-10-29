@@ -1,13 +1,15 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MGroup.Materials" Version="1.0.184" />
-    <PackageReference Include="MGroup.MSolve.Discretization" Version="1.0.162" />
-    <PackageReference Include="MGroup.Solvers" Version="1.0.186" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\MSolve.Constitutive\src\MGroup.Materials\MGroup.Materials.csproj" />
+    <ProjectReference Include="..\..\..\MSolve.Core\src\MGroup.MSolve.Discretization\MGroup.MSolve.Discretization.csproj" />
   </ItemGroup>
 
 </Project>
