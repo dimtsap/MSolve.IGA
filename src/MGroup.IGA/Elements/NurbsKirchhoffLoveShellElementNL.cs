@@ -106,8 +106,8 @@ namespace MGroup.IGA.Elements
 			var elementNodalForces = new double[shellElement.ControlPointsDictionary.Count * 3];
 
 			_solution = localDisplacements;
-			var newControlPoints = CurrentControlPoint(controlPoints);
-			//var newControlPoints = controlPoints;
+			//var newControlPoints = CurrentControlPoint(controlPoints);
+			var newControlPoints = controlPoints;
 
 			var nurbs = new Nurbs2D(shellElement, shellElement.ControlPoints.ToArray());
 			var gaussPoints = materialsAtThicknessGP.Keys.ToArray();
@@ -140,9 +140,9 @@ namespace MGroup.IGA.Elements
 				var surfaceBasisVectorDerivative2 = CalculateSurfaceBasisVector1(hessianMatrix, 1);
 				var surfaceBasisVectorDerivative12 = CalculateSurfaceBasisVector1(hessianMatrix, 2);
 
-				var Bmembrane = CalculateMembraneDeformationMatrix(controlPoints, nurbs, j, surfaceBasisVector1,
+				var Bmembrane = CalculateMembraneDeformationMatrix(newControlPoints, nurbs, j, surfaceBasisVector1,
 					surfaceBasisVector2);
-				var Bbending = CalculateBendingDeformationMatrix(controlPoints, surfaceBasisVector3, nurbs, j, surfaceBasisVector2,
+				var Bbending = CalculateBendingDeformationMatrix(newControlPoints, surfaceBasisVector3, nurbs, j, surfaceBasisVector2,
 					surfaceBasisVectorDerivative1, surfaceBasisVector1, J1, surfaceBasisVectorDerivative2,
 					surfaceBasisVectorDerivative12);
 
@@ -265,7 +265,9 @@ namespace MGroup.IGA.Elements
 						 surfaceBasisVectorDerivative12[1] * unitVector3[1] +
 						 surfaceBasisVectorDerivative12[2] * unitVector3[2];
 
-				var bendingStrain = new double[] { b11 - B11, b22 - B22, b12 - B12 };
+				//var bendingStrain = new double[] { b11 - B11, b22 - B22, 2*b12 - 2*B12 };
+
+				var bendingStrain = new double[] { b11 - B11, b22 - B22, 2 * b12 - 2 * B12 };
 
 				foreach (var keyValuePair in materialsAtThicknessGP[midsurfaceGP[j]])
 				{
