@@ -106,8 +106,9 @@ namespace MGroup.IGA.Elements
 			var elementNodalForces = new double[shellElement.ControlPointsDictionary.Count * 3];
 
 			_solution = localDisplacements;
-			//var newControlPoints = CurrentControlPoint(controlPoints);
-			var newControlPoints = controlPoints;
+
+			var newControlPoints = CurrentControlPoint(controlPoints);
+			//var newControlPoints = controlPoints;
 
 			var nurbs = new Nurbs2D(shellElement, shellElement.ControlPoints.ToArray());
 			var gaussPoints = materialsAtThicknessGP.Keys.ToArray();
@@ -185,6 +186,8 @@ namespace MGroup.IGA.Elements
 			_solution = localDisplacements;
 
 			var newControlPoints = CurrentControlPoint(elementControlPoints);
+			//var newControlPoints = elementControlPoints;
+
 			var midsurfaceGP = materialsAtThicknessGP.Keys.ToArray();
 			for (var j = 0; j < midsurfaceGP.Length; j++)
 			{
@@ -267,14 +270,14 @@ namespace MGroup.IGA.Elements
 
 				//var bendingStrain = new double[] { b11 - B11, b22 - B22, 2*b12 - 2*B12 };
 
-				var bendingStrain = new double[] { b11 - B11, b22 - B22, 2 * b12 - 2 * B12 };
+				var bendingStrain = new double[] { -(b11 - B11), -(b22 - B22), -(2 * b12 - 2 * B12) };
 
 				foreach (var keyValuePair in materialsAtThicknessGP[midsurfaceGP[j]])
 				{
 					var thicknessPoint = keyValuePair.Key;
 					var material = keyValuePair.Value;
 					var gpStrain = new double[bendingStrain.Length];
-					var z = -thicknessPoint.Zeta;
+					var z = thicknessPoint.Zeta;
 					for (var i = 0; i < bendingStrain.Length; i++)
 					{
 						gpStrain[i] += membraneStrain[i] + bendingStrain[i] * z;
@@ -429,7 +432,7 @@ namespace MGroup.IGA.Elements
 				for (int j = 0; j < 3; j++)
 				{
 					MembraneForces[j] += material.Stresses[j] * w;
-					BendingMoments[j] += material.Stresses[j] * w * z;
+					BendingMoments[j] -= material.Stresses[j] * w * z;
 				}
 			}
 
@@ -623,6 +626,28 @@ namespace MGroup.IGA.Elements
 			return cp;
 		}
 
+		private ControlPoint[] DControlPoint(ControlPoint[] controlPoints, double[] incrementDisp)
+		{
+			var cp = new ControlPoint[controlPoints.Length];
+
+			for (int i = 0; i < controlPoints.Length; i++)
+			{
+				cp[i] = new ControlPoint()
+				{
+					X = controlPoints[i].X + incrementDisp[i * 3],
+					Y = controlPoints[i].Y + incrementDisp[i * 3 + 1],
+					Z = controlPoints[i].Z + incrementDisp[i * 3 + 2],
+					Ksi = controlPoints[i].Ksi,
+					Heta = controlPoints[i].Heta,
+					Zeta = controlPoints[i].Zeta,
+					WeightFactor = controlPoints[i].WeightFactor
+				};
+			}
+
+			return cp;
+		}
+
+
 		private static double[,] CalculateHessian(ControlPoint[] controlPoints, Nurbs2D nurbs, int j)
 		{
 			var hessianMatrix = new double[3, 3];
@@ -706,8 +731,9 @@ namespace MGroup.IGA.Elements
 			{
 				#region BI1
 
-				var BI1 = s3.CrossProduct(s3);
+				var BI1 = s3.CrossProduct(s1);
 				BI1.ScaleIntoThis(nurbs.NurbsDerivativeValuesHeta[column / 3, j]);
+
 				var auxVector = s2.CrossProduct(s3);
 				auxVector.ScaleIntoThis(nurbs.NurbsDerivativeValuesKsi[column / 3, j]);
 				BI1.AddIntoThis(auxVector);
@@ -732,7 +758,7 @@ namespace MGroup.IGA.Elements
 
 				#region BI2
 
-				IVector BI2 = s3.CrossProduct(s3);
+				IVector BI2 = s3.CrossProduct(s1);
 				BI2.ScaleIntoThis(nurbs.NurbsDerivativeValuesHeta[column / 3, j]);
 				auxVector = s2.CrossProduct(s3);
 				auxVector.ScaleIntoThis(nurbs.NurbsDerivativeValuesKsi[column / 3, j]);
@@ -755,7 +781,7 @@ namespace MGroup.IGA.Elements
 
 				#region BI3
 
-				var BI3 = s3.CrossProduct(s3);
+				var BI3 = s3.CrossProduct(s1);
 				BI3.ScaleIntoThis(nurbs.NurbsDerivativeValuesHeta[column / 3, j]);
 				auxVector = s2.CrossProduct(s3);
 				auxVector.ScaleIntoThis(nurbs.NurbsDerivativeValuesKsi[column / 3, j]);
@@ -775,6 +801,18 @@ namespace MGroup.IGA.Elements
 				BI3.AddIntoThis(auxVector);
 
 				#endregion BI3
+
+				//Bbending[0, column] = BI1[0];
+				//Bbending[0, column + 1] = BI1[1];
+				//Bbending[0, column + 2] = BI1[2];
+
+				//Bbending[1, column] = BI2[0];
+				//Bbending[1, column + 1] = BI2[1];
+				//Bbending[1, column + 2] = BI2[2];
+
+				//Bbending[2, column] = 2 * BI3[0];
+				//Bbending[2, column + 1] = 2 * BI3[1];
+				//Bbending[2, column + 2] = 2 * BI3[2];
 
 				Bbending[0, column] = BI1[0];
 				Bbending[0, column + 1] = BI1[1];
