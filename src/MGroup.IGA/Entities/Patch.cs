@@ -1107,7 +1107,7 @@ namespace MGroup.IGA.Entities
 
 							break;
 						case GeometricalFormulation.NonLinear:
-							element = new NurbsKirchhoffLoveShellElementNL(new ShellElasticMaterial2Dtransformationb()
+							element = new NurbsKirchhoffLoveShellElementNL(new ShellElasticMaterial2D()
 							{
 								YoungModulus = this.Material.YoungModulus,
 								PoissonRatio = this.Material.PoissonRatio
@@ -1116,7 +1116,7 @@ namespace MGroup.IGA.Entities
 								ID = elementID,
 								Patch = this,
 								Thickness = this.Thickness,
-								ElementType = new NurbsKirchhoffLoveShellElementNL(new ShellElasticMaterial2Dtransformationb()
+								ElementType = new NurbsKirchhoffLoveShellElementNL(new ShellElasticMaterial2D()
 								{
 									YoungModulus = this.Material.YoungModulus,
 									PoissonRatio = this.Material.PoissonRatio
@@ -1128,8 +1128,33 @@ namespace MGroup.IGA.Entities
 								}
 							};
 							break;
+						case GeometricalFormulation.SectionNonLinear:
+							element = new NurbsKirchhoffLoveShellElementSectionNL(
+								new ShellElasticSectionMaterial2D()
+								{
+									YoungModulus = this.Material.YoungModulus,
+									PoissonRatio = this.Material.PoissonRatio,
+									Thickness = this.Thickness
+								}, knotsOfElement, elementControlPoints, this, this.Thickness)
+							{
+								ID = elementID,
+								Patch = this,
+								Thickness = this.Thickness,
+								ElementType = new NurbsKirchhoffLoveShellElementSectionNL(new ShellElasticSectionMaterial2D()
+								{
+									YoungModulus = this.Material.YoungModulus,
+									PoissonRatio = this.Material.PoissonRatio,
+									Thickness = this.Thickness
+								}, knotsOfElement, elementControlPoints, this, this.Thickness)
+								{
+									ID = elementID,
+									Patch = this,
+									Thickness = this.Thickness
+								}
+							};
+								
+							break;
 					}
-
 					Elements.Add(element);
 				}
 			}

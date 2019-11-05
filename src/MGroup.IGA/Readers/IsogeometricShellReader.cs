@@ -11,7 +11,8 @@ namespace MGroup.IGA.Readers
 	public enum GeometricalFormulation
 	{
 		Linear,
-		NonLinear
+		NonLinear,
+		SectionNonLinear
 	}
 
 	/// <summary>
