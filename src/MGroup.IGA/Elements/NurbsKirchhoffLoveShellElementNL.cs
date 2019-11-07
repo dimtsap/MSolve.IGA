@@ -105,6 +105,9 @@ namespace MGroup.IGA.Elements
 			var controlPoints = shellElement.ControlPoints.ToArray();
 			var elementNodalForces = new double[shellElement.ControlPointsDictionary.Count * 3];
 
+			var elementMembraneForces = new double[shellElement.ControlPointsDictionary.Count * 3];
+			var elementBendingForces = new double[shellElement.ControlPointsDictionary.Count * 3];
+
 			_solution = localDisplacements;
 
 			var newControlPoints = CurrentControlPoint(controlPoints);
@@ -151,12 +154,18 @@ namespace MGroup.IGA.Elements
 					IntegratedStressesOverThickness(gaussPoints[j]);
 
 				var wfactor = InitialJ1[j] * gaussPoints[j].WeightFactor;
+
+				
+
 				for (int i = 0; i < Bmembrane.GetLength(1); i++)
 				{
 					for (int k = 0; k < Bmembrane.GetLength(0); k++)
 					{
 						elementNodalForces[i] += (Bmembrane[k, i] * membraneForces[k] * wfactor +
 												 Bbending[k, i] * bendingMoments[k] * wfactor);
+
+						elementMembraneForces[i] += Bmembrane[k, i] * membraneForces[k] * wfactor;
+						elementBendingForces[i] += Bbending[k, i] * bendingMoments[k] * wfactor;
 					}
 				}
 			}
@@ -186,6 +195,8 @@ namespace MGroup.IGA.Elements
 			_solution = localDisplacements;
 
 			var newControlPoints = CurrentControlPoint(elementControlPoints);
+
+			
 			//var newControlPoints = elementControlPoints;
 
 			var midsurfaceGP = materialsAtThicknessGP.Keys.ToArray();
@@ -268,9 +279,9 @@ namespace MGroup.IGA.Elements
 						 surfaceBasisVectorDerivative12[1] * unitVector3[1] +
 						 surfaceBasisVectorDerivative12[2] * unitVector3[2];
 
-				//var bendingStrain = new double[] { b11 - B11, b22 - B22, 2*b12 - 2*B12 };
+				var bendingStrain = new double[] { b11 - B11, b22 - B22, 2*b12 - 2*B12 };
 
-				var bendingStrain = new double[] { -(b11 - B11), -(b22 - B22), -(2 * b12 - 2 * B12) };
+				//var bendingStrain = new double[] { -(b11 - B11), -(b22 - B22), -(2 * b12 - 2 * B12) };
 
 				foreach (var keyValuePair in materialsAtThicknessGP[midsurfaceGP[j]])
 				{
